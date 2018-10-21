@@ -156,6 +156,7 @@ void test_create_from() {
 	EXPECT_EQ(0, m.get(2, 1));
 }
 
+
 void test_for_each() {
 	sparse::Matrix<int> m(2, 3);
 
@@ -197,7 +198,50 @@ void test_for_each() {
 	EXPECT_EQ(2, vec.size());
 	EXPECT_EQ(0, vec[0]);
 	EXPECT_EQ(1, vec[1]);
+
+	vec.clear();
+	m.for_each([&vec](int row, int col, int value) -> bool {
+		if (value > 3) {
+			return false;
+		}
+		vec.push_back(value);
+		return true;
+	});
+
+	EXPECT_EQ(3, vec.size());
+	EXPECT_EQ(1, vec[0]);
+	EXPECT_EQ(2, vec[1]);
+	EXPECT_EQ(3, vec[2]);
 }
+
+
+void test_remove_if() {
+	sparse::Matrix<int> m(2, 3);
+
+	int v = 0;
+	m.create_from([&v](int row, int col) {
+		v = row * 3 + col + 1;
+		return &v;
+	});
+
+	EXPECT_EQ(3, m.rank_row(0));
+	EXPECT_EQ(3, m.rank_row(1));
+	EXPECT_EQ(2, m.rank_col(0));
+	EXPECT_EQ(2, m.rank_col(1));
+	EXPECT_EQ(2, m.rank_col(2));
+
+	m.remove_if([](int row, int col, int value) -> bool {
+		return value % 2 == 1;
+	});
+
+	EXPECT_EQ(1, m.rank_row(0));
+	EXPECT_EQ(2, m.rank_row(1));
+	EXPECT_EQ(1, m.rank_col(0));
+	EXPECT_EQ(1, m.rank_col(1));
+	EXPECT_EQ(1, m.rank_col(2));
+
+}
+
 
 void test_find_cell() {
 	sparse::Matrix<int> m(2, 4);
@@ -244,5 +288,6 @@ int main() {
 	test_clear();
 	test_create_from();
 	test_for_each();
+	test_remove_if();
 	test_find_cell();
 }
