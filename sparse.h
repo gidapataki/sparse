@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 
@@ -342,30 +341,3 @@ private:
 
 
 } // namespace sparse
-
-
-
-template<typename U, typename V>
-void expect_eq(int line, const U& expected, const V& actual) {
-	if (expected != actual) {
-		std::cerr << "Error in line " << line << std::endl;
-		std::cerr << "  expected: " << expected << std::endl;
-		std::cerr << "    actual: " << actual << std::endl;
-	}
-}
-
-
-#define EXPECT_EQ(u, v) \
-	expect_eq(__LINE__, u, v)
-
-
-int main() {
-	sparse::Matrix<int> m;
-
-	EXPECT_EQ(0, m.row_size());
-	EXPECT_EQ(0, m.col_size());
-
-	m.resize(2, 3);
-	EXPECT_EQ(2, m.row_size());
-	EXPECT_EQ(3, m.col_size());
-}

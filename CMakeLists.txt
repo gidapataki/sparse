@@ -4,4 +4,4 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(sparse sparse.cpp)
+add_executable(test-sparse test.cpp)
