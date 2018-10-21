@@ -409,6 +409,14 @@ public:
 		}
 	}
 
+	void remove_cell(CellPtr cell) {
+		if (cell) {
+			--rows_[cell->in_col.index].rank;
+			--cols_[cell->in_row.index].rank;
+			delete cell;
+		}
+	}
+
 
 private:
 	static Cell* from_row(Node* node) {
@@ -417,12 +425,6 @@ private:
 
 	static Cell* from_col(Node* node) {
 		return reinterpret_cast<Cell*>(node - 1);
-	}
-
-	void remove_cell(Cell* cell) {
-		--rows_[cell->in_col.index].rank;
-		--cols_[cell->in_row.index].rank;
-		delete cell;
 	}
 
 	Cell* find_in_row(Index row, Index col) {
