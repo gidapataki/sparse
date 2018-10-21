@@ -156,6 +156,28 @@ void test_create_from() {
 	EXPECT_EQ(0, m.get(2, 1));
 }
 
+void test_for_each() {
+	sparse::Matrix<int> m(2, 3);
+
+	int v = 0;
+	m.create_from([&v](int row, int col) {
+		v = row * 3 + col;
+		return &v;
+	});
+
+	EXPECT_EQ(1, m.get(0, 0));
+	EXPECT_EQ(2, m.get(0, 1));
+	EXPECT_EQ(3, m.get(0, 2));
+	EXPECT_EQ(4, m.get(1, 0));
+	EXPECT_EQ(5, m.get(1, 1));
+	EXPECT_EQ(6, m.get(1, 2));
+}
+
+void test_find_cell() {
+	sparse::Matrix<int> m(2, 3);
+	sparse::Matrix<int>::CellPtr cell = m.find_cell(1, 1);
+}
+
 
 int main() {
 	test_resize();
@@ -164,4 +186,5 @@ int main() {
 	test_get();
 	test_clear();
 	test_create_from();
+	test_find_cell();
 }

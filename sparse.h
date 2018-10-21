@@ -95,7 +95,21 @@ struct Node {
 
 template<typename Value>
 class Matrix {
+private:
+	struct Head {
+		Node node;
+		Rank rank = 0;
+	};
+
+	struct Cell {
+		Node in_row;
+		Node in_col;
+		Value value = {};
+	};
+
 public:
+	using CellPtr = Cell*;
+
 	Matrix() = default;
 	Matrix(Index rows, Index cols) {
 		resize(rows, cols);
@@ -152,6 +166,96 @@ public:
 		return nullptr;
 	}
 
+	CellPtr find_cell(Index row, Index col) {
+		Head& row_head = rows_[row];
+		Head& col_head = cols_[col];
+
+		if (row_head.rank > 0) {
+			auto* cell = row_head.rank < col_head.rank
+				? find_in_row(row, col)
+				: find_in_col(row, col);
+
+			return cell;
+		}
+		return nullptr;
+	}
+
+	CellPtr row_next(CellPtr cell) {
+		if (cell == nullptr) {
+			return nullptr;
+		}
+
+		auto& head = rows_[cell->in_col.index];
+		auto* p = cell->in_row.next;
+		if (p == &head.node) {
+			return nullptr;
+		}
+
+		return from_row(p);
+	}
+
+	CellPtr row_prev(CellPtr cell) {
+		if (cell == nullptr) {
+			return nullptr;
+		}
+
+		auto& head = rows_[cell->in_col.index];
+		auto* p = cell->in_row.prev;
+		if (p == &head.node) {
+			return nullptr;
+		}
+
+		return from_row(p);
+	}
+
+	CellPtr col_next(CellPtr cell) {
+		if (cell == nullptr) {
+			return nullptr;
+		}
+
+		auto& head = cols_[cell->in_row.index];
+		auto* p = cell->in_col.next;
+		if (p == &head.node) {
+			return nullptr;
+		}
+
+		return from_col(p);
+	}
+
+	CellPtr col_prev(CellPtr cell) {
+		if (cell == nullptr) {
+			return nullptr;
+		}
+
+		auto& head = cols_[cell->in_row.index];
+		auto* p = cell->in_col.prev;
+		if (p == &head.node) {
+			return nullptr;
+		}
+
+		return from_col(p);
+	}
+
+	Index get_row(CellPtr cell) {
+		if (cell == nullptr) {
+			return -1;
+		}
+
+		return cell->in_col.index;
+	}
+
+	Index get_col(CellPtr cell) {
+		if (cell == nullptr) {
+			return -1;
+		}
+
+		return cell->in_row.index;
+	}
+
+	Value& at(CellPtr cell) {
+		return cell->value;
+	}
+
 	void insert(Index row, Index col, const Value& value) {
 		access(row, col) = value;
 	}
@@ -196,7 +300,6 @@ public:
 		return cols_[index].rank;
 	}
 
-
 	template<typename Func>
 	void create_from(Func func) {
 		clear();
@@ -221,7 +324,6 @@ public:
 			}
 		}
 	}
-
 
 	template<typename Func>
 	void for_each_in_row(Index row, Func func) {
@@ -260,7 +362,6 @@ public:
 			}
 		}
 	}
-
 
 	template<typename Func>
 	void remove_in_row_if(Index row, Func func) {
@@ -308,17 +409,6 @@ public:
 
 
 private:
-	struct Head {
-		Node node;
-		Rank rank = 0;
-	};
-
-	struct Cell {
-		Node in_row;
-		Node in_col;
-		Value value = {};
-	};
-
 	static Cell* from_row(Node* node) {
 		return reinterpret_cast<Cell*>(node);
 	}
@@ -359,20 +449,6 @@ private:
 				auto* cell = from_col(p);
 				return cell;
 			}
-		}
-		return nullptr;
-	}
-
-	Cell* find_cell(Index row, Index col) {
-		Head& row_head = rows_[row];
-		Head& col_head = cols_[col];
-
-		if (row_head.rank > 0) {
-			auto* cell = row_head.rank < col_head.rank
-				? find_in_row(row, col)
-				: find_in_col(row, col);
-
-			return cell;
 		}
 		return nullptr;
 	}
