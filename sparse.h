@@ -85,9 +85,7 @@ public:
 	}
 
 	~Matrix() {
-		for (Index i = 0; i < rows_.size(); ++i) {
-			clear_row(i);
-		}
+		clear();
 	}
 
 	Index row_size() const {
@@ -135,22 +133,36 @@ public:
 		access(row, col) = value;
 	}
 
-	void clear_row(Index index) {
+	Rank clear_row(Index index) {
+		Rank removed = 0;
 		auto& head = rows_[index];
 		for (Node* p = head.node.next; p != &head.node; ) {
 			auto* cell = from_row(p);
 			p = p->next;
 			remove_cell(cell);
+			++removed;
 		}
+		return removed;
 	}
 
-	void clear_col(Index index) {
+	Rank clear_col(Index index) {
+		Rank removed = 0;
 		auto& head = cols_[index];
 		for (Node* p = head.node.next; p != &head.node; ) {
 			auto* cell = from_col(p);
 			p = p->next;
 			remove_cell(cell);
+			++removed;
 		}
+		return removed;
+	}
+
+	Rank clear() {
+		Rank removed = 0;
+		for (Index i = 0; i < rows_.size(); ++i) {
+			removed += clear_row(i);
+		}
+		return removed;
 	}
 
 	Rank rank_row(Index index) const {
@@ -184,6 +196,19 @@ public:
 			}
 		}
 	}
+
+	template<typename Func>
+	void for_each(Func func) {
+		auto& head = rows_[row];
+		for (Node* p = head.node.next; p != &head.node; p = p->next) {
+			auto* cell = from_row(p);
+			auto col = p->index;
+			if (!func(row, col, cell->value)) {
+				break;
+			}
+		}
+	}
+
 
 	template<typename Func>
 	void remove_in_row_if(Index row, Func func) {
