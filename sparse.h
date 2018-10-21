@@ -173,6 +173,33 @@ public:
 		return cols_[index].rank;
 	}
 
+
+	template<typename Func>
+	void create_from(Func func) {
+		clear();
+		for (Index row = 0; row < rows_.size(); ++row) {
+			auto& row_head = rows_[row];
+			for (Index col = 0; col < cols_.size(); ++col) {
+				auto* value = func(row, col);
+				if (!value) {
+					continue;
+				}
+
+				auto* cell = new Cell();
+				auto& col_head = cols_[col];
+
+				cell->value = *value;
+				cell->in_row.index = col;
+				cell->in_col.index = row;
+				cell->in_row.insert_before(&row_head.node);
+				cell->in_col.insert_before(&col_head.node);
+				++row_head.rank;
+				++col_head.rank;
+			}
+		}
+	}
+
+
 	template<typename Func>
 	void for_each_in_row(Index row, Func func) {
 		auto& head = rows_[row];

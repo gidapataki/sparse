@@ -139,11 +139,30 @@ void test_clear() {
 }
 
 
+void test_create_from() {
+	std::vector<int> vec{1, 2, 3, 4, 5, 6};
+	sparse::Matrix<int> m(3, 2);
+
+	m.create_from([&vec](int row, int col) {
+		auto& value = vec[row * 2 + col];
+		return value % 2 == 1 ? &value : nullptr;
+	});
+
+	EXPECT_EQ(1, m.get_or(0, 0, 0));
+	EXPECT_EQ(0, m.get_or(0, 1, 0));
+	EXPECT_EQ(3, m.get_or(1, 0, 0));
+	EXPECT_EQ(0, m.get_or(1, 1, 0));
+	EXPECT_EQ(5, m.get_or(2, 0, 0));
+	EXPECT_EQ(0, m.get_or(2, 1, 0));
+
+}
+
+
 int main() {
 	test_resize();
 	test_insert();
 	test_resize();
 	test_get();
 	test_clear();
-
+	test_create_from();
 }
