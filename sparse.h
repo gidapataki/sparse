@@ -199,12 +199,14 @@ public:
 
 	template<typename Func>
 	void for_each(Func func) {
-		auto& head = rows_[row];
-		for (Node* p = head.node.next; p != &head.node; p = p->next) {
-			auto* cell = from_row(p);
-			auto col = p->index;
-			if (!func(row, col, cell->value)) {
-				break;
+		for (Index row = 0; row < rows_.size(); ++row) {
+			auto& head = rows_[row];
+			for (Node* p = head.node.next; p != &head.node; p = p->next) {
+				auto* cell = from_row(p);
+				auto col = p->index;
+				if (!func(row, col, cell->value)) {
+					break;
+				}
 			}
 		}
 	}
