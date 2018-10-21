@@ -161,23 +161,80 @@ void test_for_each() {
 
 	int v = 0;
 	m.create_from([&v](int row, int col) {
-		v = row * 3 + col;
+		v = row * 3 + col + 1;
 		return &v;
 	});
 
-	EXPECT_EQ(1, m.get(0, 0));
-	EXPECT_EQ(2, m.get(0, 1));
-	EXPECT_EQ(3, m.get(0, 2));
-	EXPECT_EQ(4, m.get(1, 0));
-	EXPECT_EQ(5, m.get(1, 1));
-	EXPECT_EQ(6, m.get(1, 2));
+	std::vector<int> vec;
+
+	m.for_each([&vec](int row, int col, int value) -> void {
+		vec.push_back(value);
+	});
+
+	EXPECT_EQ(6, vec.size());
+	EXPECT_EQ(1, vec[0]);
+	EXPECT_EQ(2, vec[1]);
+	EXPECT_EQ(3, vec[2]);
+	EXPECT_EQ(4, vec[3]);
+	EXPECT_EQ(5, vec[4]);
+	EXPECT_EQ(6, vec[5]);
+
+	vec.clear();
+	m.for_each_in_row(1, [&vec](int row, int col, int value) -> void {
+		vec.push_back(value);
+	});
+
+	EXPECT_EQ(3, vec.size());
+	EXPECT_EQ(4, vec[0]);
+	EXPECT_EQ(5, vec[1]);
+	EXPECT_EQ(6, vec[2]);
+
+	vec.clear();
+	m.for_each_in_col(1, [&vec](int row, int col, int value) -> void {
+		vec.push_back(row);
+	});
+
+	EXPECT_EQ(2, vec.size());
+	EXPECT_EQ(0, vec[0]);
+	EXPECT_EQ(1, vec[1]);
 }
 
 void test_find_cell() {
-	sparse::Matrix<int> m(2, 3);
-	sparse::Matrix<int>::CellPtr cell = m.find_cell(1, 1);
-}
+	sparse::Matrix<int> m(2, 4);
+	EXPECT_EQ((void*) nullptr, m.find_cell(1, 1));
 
+	m.insert(1, 1, 5);
+	EXPECT_NE((void*) nullptr, m.find_cell(1, 1));
+
+	m.insert(0, 0, 1);
+	m.insert(0, 3, 2);
+	m.insert(1, 3, 3);
+
+	auto* cell = m.find_cell(0, 0);
+	EXPECT_EQ(1, m.at(cell));
+
+	cell = m.row_next(cell);
+	EXPECT_EQ(2, m.at(cell));
+	EXPECT_EQ(0, m.get_row(cell));
+	EXPECT_EQ(3, m.get_col(cell));
+	EXPECT_EQ((void*) nullptr, m.row_next(cell));
+	EXPECT_EQ((void*) nullptr, m.col_prev(cell));
+
+	cell = m.col_next(cell);
+	EXPECT_EQ(3, m.at(cell));
+	EXPECT_EQ((void*) nullptr, m.col_next(cell));
+
+	cell = m.row_prev(cell);
+	EXPECT_EQ(5, m.at(cell));
+	EXPECT_EQ(1, m.get_row(cell));
+	EXPECT_EQ(1, m.get_col(cell));
+	EXPECT_EQ((void*) nullptr, m.col_prev(cell));
+	EXPECT_EQ((void*) nullptr, m.col_next(cell));
+	EXPECT_EQ((void*) nullptr, m.row_prev(cell));
+
+	m.at(cell) = 13;
+	EXPECT_EQ(13, m.get(1, 1));
+}
 
 int main() {
 	test_resize();
@@ -186,5 +243,6 @@ int main() {
 	test_get();
 	test_clear();
 	test_create_from();
+	test_for_each();
 	test_find_cell();
 }

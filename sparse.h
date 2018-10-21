@@ -331,7 +331,7 @@ public:
 		for (Node* p = head.node.next; p != &head.node; p = p->next) {
 			auto* cell = from_row(p);
 			auto col = p->index;
-			if (!detail::invoke(func(row, col, cell->value))) {
+			if (!detail::invoke(func, row, col, cell->value)) {
 				break;
 			}
 		}
@@ -343,7 +343,7 @@ public:
 		for (Node* p = head.node.next; p != &head.node; p = p->next) {
 			auto* cell = from_col(p);
 			auto row = p->index;
-			if (!detail::invoke(func(row, col, cell->value))) {
+			if (!detail::invoke(func, row, col, cell->value)) {
 				break;
 			}
 		}
@@ -356,7 +356,7 @@ public:
 			for (Node* p = head.node.next; p != &head.node; p = p->next) {
 				auto* cell = from_row(p);
 				auto col = p->index;
-				if (!detail::invoke(func(row, col, cell->value))) {
+				if (!detail::invoke(func, row, col, cell->value)) {
 					break;
 				}
 			}
