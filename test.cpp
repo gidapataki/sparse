@@ -154,7 +154,6 @@ void test_create_from() {
 	EXPECT_EQ(0, m.get(1, 1));
 	EXPECT_EQ(5, m.get(2, 0));
 	EXPECT_EQ(0, m.get(2, 1));
-
 }
 
 

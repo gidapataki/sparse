@@ -1,7 +1,26 @@
 #include <vector>
+#include <type_traits>
 
 
 namespace sparse {
+
+namespace detail {
+
+template<typename F, typename... Ts>
+typename std::enable_if<std::is_same<decltype(std::declval<F>()(std::declval<Ts>()...)), void>::value, bool>::type
+invoke(F func, Ts&&... ts) {
+    func(std::forward<Ts>(ts)...);
+    return true;
+}
+
+template<typename F, typename... Ts>
+typename std::enable_if<!std::is_same<decltype(std::declval<F>()(std::declval<Ts>()...)), void>::value, bool>::type
+invoke(F func, Ts&&... ts) {
+    return func(std::forward<Ts>(ts)...);
+}
+
+} // namespace detail
+
 
 using Index = std::size_t;
 using Rank = std::size_t;
@@ -67,7 +86,6 @@ struct Node {
 		link(this, u);
 	}
 
-
 	Node* prev;
 	Node* next;
 	Index index = -1;
@@ -79,10 +97,15 @@ template<typename Value>
 class Matrix {
 public:
 	Matrix() = default;
-
 	Matrix(Index rows, Index cols) {
 		resize(rows, cols);
 	}
+
+	Matrix(const Matrix&) = delete;
+	Matrix& operator=(const Matrix&) = delete;
+
+	Matrix(Matrix&& other) = default;
+	Matrix& operator=(Matrix&&) = default;
 
 	~Matrix() {
 		clear();
@@ -206,7 +229,7 @@ public:
 		for (Node* p = head.node.next; p != &head.node; p = p->next) {
 			auto* cell = from_row(p);
 			auto col = p->index;
-			if (!func(row, col, cell->value)) {
+			if (!detail::invoke(func(row, col, cell->value))) {
 				break;
 			}
 		}
@@ -218,7 +241,7 @@ public:
 		for (Node* p = head.node.next; p != &head.node; p = p->next) {
 			auto* cell = from_col(p);
 			auto row = p->index;
-			if (!func(row, col, cell->value)) {
+			if (!detail::invoke(func(row, col, cell->value))) {
 				break;
 			}
 		}
@@ -231,7 +254,7 @@ public:
 			for (Node* p = head.node.next; p != &head.node; p = p->next) {
 				auto* cell = from_row(p);
 				auto col = p->index;
-				if (!func(row, col, cell->value)) {
+				if (!detail::invoke(func(row, col, cell->value))) {
 					break;
 				}
 			}
