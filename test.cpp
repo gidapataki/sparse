@@ -97,8 +97,8 @@ void test_get() {
 	m.insert(0, 3, 6);
 
 	// get_or
-	EXPECT_EQ(3, m.get_or(0, 1, 3));
-	EXPECT_EQ(6, m.get_or(0, 3, 3));
+	EXPECT_EQ(3, m.get(0, 1, 3));
+	EXPECT_EQ(6, m.get(0, 3));
 }
 
 
@@ -148,12 +148,12 @@ void test_create_from() {
 		return value % 2 == 1 ? &value : nullptr;
 	});
 
-	EXPECT_EQ(1, m.get_or(0, 0, 0));
-	EXPECT_EQ(0, m.get_or(0, 1, 0));
-	EXPECT_EQ(3, m.get_or(1, 0, 0));
-	EXPECT_EQ(0, m.get_or(1, 1, 0));
-	EXPECT_EQ(5, m.get_or(2, 0, 0));
-	EXPECT_EQ(0, m.get_or(2, 1, 0));
+	EXPECT_EQ(1, m.get(0, 0));
+	EXPECT_EQ(0, m.get(0, 1));
+	EXPECT_EQ(3, m.get(1, 0));
+	EXPECT_EQ(0, m.get(1, 1));
+	EXPECT_EQ(5, m.get(2, 0));
+	EXPECT_EQ(0, m.get(2, 1));
 
 }
 

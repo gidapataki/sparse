@@ -113,7 +113,7 @@ public:
 		cols_.resize(cols);
 	}
 
-	Value get_or(Index row, Index col, Value value={}) {
+	Value get(Index row, Index col, Value value={}) {
 		auto* cell = find_cell(row, col);
 		if (cell) {
 			return cell->value;
