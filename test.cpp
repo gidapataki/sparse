@@ -280,6 +280,47 @@ void test_find_cell() {
 	EXPECT_EQ(13, m.get(1, 1));
 }
 
+
+void test_copy() {
+	sparse::Matrix<int> m(2, 4), w;
+
+	int v = 0;
+	m.create_from([&v](int row, int col) {
+		v = row * 4 + col + 1;
+		return &v;
+	});
+
+
+	EXPECT_EQ(4, m.rank_row(0));
+	EXPECT_EQ(2, m.rank_col(2));
+
+	w = m;
+	EXPECT_EQ(4, w.rank_row(0));
+	EXPECT_EQ(2, w.rank_col(2));
+
+	m.clear_row(0);
+	m.clear_col(1);
+
+	EXPECT_EQ(0, m.rank_row(0));
+	EXPECT_EQ(4, w.rank_row(0));
+	EXPECT_EQ(2, w.rank_col(2));
+	EXPECT_EQ(2, w.rank_col(1));
+
+	EXPECT_EQ(1, w.get(0, 0));
+	EXPECT_EQ(6, w.get(1, 1));
+
+	sparse::Matrix<int> q(m);
+
+	int count = 0;
+	q.for_each([&](int row, int col, int value) {
+		++count;
+		EXPECT_EQ(m.get(row, col), value);
+	});
+
+	EXPECT_EQ(3, count);
+}
+
+
 int main() {
 	test_resize();
 	test_insert();
@@ -290,4 +331,5 @@ int main() {
 	test_for_each();
 	test_remove_if();
 	test_find_cell();
+	test_copy();
 }

@@ -117,8 +117,16 @@ public:
 		resize(rows, cols);
 	}
 
-	Matrix(const Matrix&) = delete;
-	Matrix& operator=(const Matrix&) = delete;
+	Matrix(const Matrix& other) {
+		copy_from(other);
+	}
+
+	Matrix& operator=(const Matrix& other) {
+		if (&other != this) {
+			copy_from(other);
+		}
+		return *this;
+	}
 
 	Matrix(Matrix&& other) = default;
 	Matrix& operator=(Matrix&&) = default;
@@ -419,6 +427,31 @@ public:
 
 
 private:
+	void copy_from(const Matrix& other) {
+		clear();
+		resize(other.row_size(), other.col_size());
+
+		for (Index row = 0; row < rows_.size(); ++row) {
+			auto& src = other.rows_[row];
+			auto& row_head = rows_[row];
+
+			for (Node* p = src.node.next; p != &src.node; p = p->next) {
+				auto col = p->index;
+				auto& col_head = cols_[col];
+
+				auto* cell = from_row(p);
+				auto* new_cell = new Cell();
+				new_cell->value = cell->value;
+				new_cell->in_row.index = col;
+				new_cell->in_col.index = row;
+				new_cell->in_row.insert_before(&row_head.node);
+				new_cell->in_col.insert_before(&col_head.node);
+				++row_head.rank;
+				++col_head.rank;
+			}
+		}
+	}
+
 	static Cell* from_row(Node* node) {
 		return reinterpret_cast<Cell*>(node);
 	}
